@@ -11,14 +11,10 @@ def arima_model(
 
     Fit an ARIMA model for time-series forecasting.
 
-    Args:
-        endog (pd.Series): The time-series (y training) dataset to fit for forecasting.
-        exog (pd.DataFrame): The time-series of X exogenous regressors.
-        parameters (dict): Dictionary of parameters to configure the ARIMA model.
-
-    Returns:
-        ARIMA: Returns an instantiated (not yet fitted) ARIMA model
-
+    :param endog: Time series data.
+    :param exog: Exogen data.
+    :param parameters: Dictionary of model parameters.
+    :return: ARIMA model.
     """
     # Check else modeling error
     if exog.empty:
