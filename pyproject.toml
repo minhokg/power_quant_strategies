@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "power-quant-strategies"
+version = "0.1.0"
+description = "Quantitative trading strategies for electricity markets using machine learning, optimization, and statistical modeling."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Minho Kang" }
+]
+dependencies = [
+    "pre-commit>=4.6.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
