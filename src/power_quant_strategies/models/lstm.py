@@ -9,6 +9,12 @@ class LSTMClassifier(nn.Module):
     This model uses a multilayer LSTM encoder followed by a linear
     classification head. The output is a raw logit (no sigmoid),
     suitable for BCEWithLogitsLoss.
+
+    :param input_size: Number of input features per time-step.
+    :param hidden_size: Hidden dimension of each LSTM layer.
+    :param num_layers: Number of stacked LSTM layers.
+    :param dropout: Dropout probability between layers.
+    :param bidirectional: Use bidirectional LSTM.
     """
 
     def __init__(
@@ -19,17 +25,7 @@ class LSTMClassifier(nn.Module):
         dropout: float = 0.2,
         bidirectional: bool = False,
     ) -> None:
-        """
-        Initialize the LSTM classifier.
-
-        Args:
-            input_size (int): Number of input features per time-step.
-            hidden_size (int): Hidden dimension of each LSTM layer.
-            num_layers (int): Number of stacked LSTM layers.
-            dropout (float): Dropout probability between layers.
-            bidirectional (bool): Use bidirectional LSTM.
-
-        """
+        """Initialize the LSTM classifier."""
         super().__init__()
 
         self.lstm = nn.LSTM(
@@ -48,12 +44,8 @@ class LSTMClassifier(nn.Module):
         """
         Forward pass.
 
-        Args:
-            x (Tensor): Shape (batch, seq_len, input_size)
-
-        Returns:
-            Tensor: Raw logits, shape (batch, 1)
-
+        :param x: Input tensor.
+        :returns: Output tensor.
         """
         out, _ = self.lstm(x)
         last = out[:, -1, :]
