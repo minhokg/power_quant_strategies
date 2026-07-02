@@ -13,6 +13,7 @@ authors = [
     { name = "Minho Kang" }
 ]
 dependencies = [
+    "colorlog>=6.10.1",
     "numpy>=1.26,<3.0",
     "pandas>=2.1.0",
     "statsmodels>=0.14.6",
