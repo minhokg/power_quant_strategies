@@ -3,7 +3,6 @@ from typing import Union
 
 import numpy as np
 import pandas as pd
-
 from xgboost import XGBClassifier
 
 
@@ -35,7 +34,7 @@ def fit_xgboost(
     :return: tuple with model and original datasets
     """
     # give user feedback
-    logging.info("fit xgboost")
+    logging.info("fit xgboost_result")
 
     # For some reason this sometimes gets converted to a float (still .000) during backtesting and then throws an error inside XGBoost
     hyperparameter["max_depth"] = int(hyperparameter["max_depth"])
