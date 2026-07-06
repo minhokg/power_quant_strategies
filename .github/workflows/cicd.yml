@@ -23,7 +23,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install ruff
-        run: uv tool install ruff==0.8.6
+        run: uv tool install ruff==0.8.2
       - name: Run ruff linter checks
         run: ruff check .
       - name: Run ruff formatter checks
