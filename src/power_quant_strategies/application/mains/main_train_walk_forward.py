@@ -8,11 +8,12 @@ from power_quant_strategies.utils.evaluate_model.evaluate_trading_plots import e
 from power_quant_strategies.utils.fit_model.fit_xgboost.fit_xgboost_walk_forward import fit_xgboost_walk_forward
 
 
-def main_train_walk_forward(data: pd.DataFrame, hyperparameter: dict, save_path: str = str(Path.cwd())) -> None:
+def main_train_walk_forward(data: pd.DataFrame, settings: BaseSettings, hyperparameter: dict, save_path: str = str(Path.cwd())) -> None:
     """
     Train walk forward.
 
     :param data: DataFrame used for training walk forward methodology
+    :param settings: BaseSettings object
     :param hyperparameter: Hyperparameter used for training
     :param save_path: Save path for saving results
     :return: None
@@ -41,10 +42,10 @@ def main_train_walk_forward(data: pd.DataFrame, hyperparameter: dict, save_path:
         trading_metrics_test,
     ) = fit_xgboost_walk_forward(
         data=data,
-        column_name_target=BaseSettings.column_name_target,
+        column_name_target=settings.column_name_target,
         hyperparameter=hyperparameter,
-        shuffle=BaseSettings.shuffle,
-        verbose=BaseSettings.verbose,
+        shuffle=settings.shuffle,
+        verbose=settings.verbose,
         save_path=save_path_walk_forward,
     )
 
