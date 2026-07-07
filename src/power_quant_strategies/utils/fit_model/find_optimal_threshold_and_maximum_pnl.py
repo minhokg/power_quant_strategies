@@ -64,8 +64,12 @@ def find_optimal_threshold_and_maximum_pnl(
     # save threshold and maximum pnl to disk
     if save_path is not None:
         os.makedirs(name=os.path.join(save_path, "02_fit_model"), exist_ok=True)
-        threshold_and_maximum_pnl = {"threshold": threshold, "maximum_pnl_per_day": maximum_pnl}
-        threshold_and_maximum_pnl = pd.DataFrame.from_dict(threshold_and_maximum_pnl, orient="index", columns=["Value"])
+        threshold_and_maximum_pnl = pd.DataFrame(
+            {
+                "Value": [threshold, maximum_pnl],
+            },
+            index=["threshold", "maximum_pnl_per_day"],
+        )
         threshold_and_maximum_pnl.to_parquet(path=os.path.join(save_path, "02_fit_model", f"threshold_and_maximum_pnl_{split}.parquet"), index=True)
         threshold_and_maximum_pnl.to_excel(excel_writer=os.path.join(save_path, "02_fit_model", f"threshold_and_maximum_pnl_{split}.xlsx"))
 
