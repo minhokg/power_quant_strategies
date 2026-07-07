@@ -34,7 +34,7 @@ def fit_xgboost(
     :return: tuple with model and original datasets
     """
     # give user feedback
-    logging.info("fit xgboost_result")
+    logging.info("fit xgboost")
 
     # For some reason this sometimes gets converted to a float (still .000) during backtesting and then throws an error inside XGBoost
     hyperparameter["max_depth"] = int(hyperparameter["max_depth"])
