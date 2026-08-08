@@ -20,7 +20,7 @@ lint.ignore = [
     "RET504",
     "S101",
     "TRY003",
-    "C901"
+    "C901",
 ]
 
 [lint.per-file-ignores]
