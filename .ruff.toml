@@ -3,6 +3,7 @@ line-length = 200
 lint.select = ["A", "B", "C", "D", "E", "F", "I", "N", "Q", "S", "T", "W"]
 lint.ignore = [
     "A002",
+    "C901",
     "D100",
     "D104",
     "D203",
