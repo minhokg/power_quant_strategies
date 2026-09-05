@@ -53,9 +53,10 @@ def find_optimal_threshold_and_maximum_pnl(
     data_copy["cumsum_pnl"] = data_copy["cumsum_pnl_long"] + data_copy["cumsum_pnl_short"]
 
     # determine maximum pnl
-    maximum_pnl = data_copy["cumsum_pnl"].max()
-    # determine optimal threshold
-    threshold = data_copy.loc[data_copy["cumsum_pnl"].idxmax(), "preds"]
+    maximum_pnl_idx = data_copy["cumsum_pnl"].values.argmax()
+
+    maximum_pnl = data_copy["cumsum_pnl"].iloc[maximum_pnl_idx]
+    threshold = data_copy["preds"].iloc[maximum_pnl_idx]
 
     # determine benchmarks
     long_only = data_copy["spread"].sum()
