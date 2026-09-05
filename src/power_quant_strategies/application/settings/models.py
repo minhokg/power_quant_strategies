@@ -6,6 +6,8 @@ class BaseSettings(BaseModel):
 
     percentage_train_hyperparameter_tuning: float = 0.6
     percentage_valid_hyperparameter_tuning: float = 0.2
+    column_name_entry: str = "da_price"
+    column_name_exit: str = "imb_price"
     column_name_target: str = "target"
     n_estimators: int = 500
     early_stopping_rounds: int = 10
