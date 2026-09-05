@@ -74,6 +74,7 @@ def remove_nans_iteratively_dataframe(
 
     # reset datetime index because of potential duplicated execution times
     df_copy.reset_index(inplace=True, names="datetime_index")
+    df_copy["_row_id"] = np.arange(len(df_copy))
 
     while df_copy.isna().values.any():
         if df_copy.empty:
