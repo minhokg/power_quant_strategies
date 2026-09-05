@@ -25,15 +25,32 @@ def _fit_spread_expected(
     reduced_data = remove_nans_iteratively_dataframe(data)
 
     model = None
+
     if reduced_data.empty:
-        logging.warning("No valid dates found in data set to fit linear regression for spread_expected.")
+        logging.warning("No valid dates found in data set to fit linear regression " "for spread_expected.")
     else:
-        model = make_pipeline(StandardScaler(), RidgeCV(alphas=(0.1, 1.0, 10.0)))
+        row_ids = reduced_data["_row_id"].to_numpy()
 
-        model.fit(X=reduced_data, y=target.loc[reduced_data.index])
+        # Align target by original row position, not datetime index.
+        y = target.iloc[row_ids]
 
-    # true false mask of available columns (features) in reduced_data
+        # Remove the internal row identifier from the model features.
+        x = reduced_data.drop(columns="_row_id")
+
+        if len(x) != len(y):
+            raise ValueError(f"X/y length mismatch after NaN removal: " f"X={len(x)}, y={len(y)}")
+
+        model = make_pipeline(
+            StandardScaler(),
+            RidgeCV(alphas=(0.1, 1.0, 10.0)),
+        )
+
+        model.fit(X=x, y=y)
+
+        reduced_data = x
+
     feature_mask = reduced_data.columns
+
     return model, feature_mask
 
 
