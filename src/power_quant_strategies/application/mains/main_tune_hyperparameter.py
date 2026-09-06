@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import pandas as pd
 
@@ -8,25 +7,25 @@ from power_quant_strategies.utils.fit_model.fit_xgboost.tune_hyperparameter_xgbo
 from power_quant_strategies.utils.helper.setup_logging import setup_logging
 
 
-def main_tune_hyperparameter(data: pd.DataFrame, settings: BaseSettings, save_path: str = str(Path.cwd())) -> dict:
+def main_tune_hyperparameter(data: pd.DataFrame, settings: BaseSettings) -> dict:
     """
     Tune hyperparameter.
 
     :param data: DataFrame containing features and target.
     :param settings: BaseSettings object
-    :param save_path: Directory for saving tuning results.
     :return: Dictionary containing the best hyperparameters.
     """
     # initialize logger
     setup_logging()
 
     # tune hyperparameter settings
-    save_path_hyperparameter = os.path.join(save_path, "tune_hyperparameter")
-    os.makedirs(name=save_path_hyperparameter, exist_ok=True)
+    save_path = os.path.join(settings.save_path, "tune_hyperparameter")
+    os.makedirs(name=save_path, exist_ok=True)
 
     ## prepare data
     # ensure the index is datetimeindex
-    data.index = pd.to_datetime(data.index)
+    if not isinstance(data.index, pd.DatetimeIndex):
+        data.index = pd.to_datetime(data.index)
 
     # shuffle the dataset before splitting to create random
     data_train_valid_test = data.sample(frac=1, random_state=42)
@@ -52,7 +51,7 @@ def main_tune_hyperparameter(data: pd.DataFrame, settings: BaseSettings, save_pa
         n_trials=settings.n_trials,
         max_run_time_per_model_fit=settings.max_run_time_per_model_fit,
         show_progress_bar=settings.show_progress_bar,
-        save_path=save_path_hyperparameter,
+        save_path=save_path,
         device=settings.device,
     )
 

@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 import pandas as pd
 
@@ -8,7 +7,7 @@ from power_quant_strategies.utils.evaluate_model.evaluate_trading_plots import e
 from power_quant_strategies.utils.fit_model.fit_xgboost.fit_xgboost_walk_forward import fit_xgboost_walk_forward
 
 
-def main_train_walk_forward(data: pd.DataFrame, settings: BaseSettings, hyperparameter: dict, save_path: str = str(Path.cwd())) -> None:
+def main_train_walk_forward(data: pd.DataFrame, settings: BaseSettings, hyperparameter: dict) -> None:
     """
     Train walk forward.
 
@@ -19,11 +18,11 @@ def main_train_walk_forward(data: pd.DataFrame, settings: BaseSettings, hyperpar
     :return: None
     """
     # create necessary folders
-    save_path_walk_forward = os.path.join(save_path, "train_walk_forward")
-    os.makedirs(name=save_path_walk_forward, exist_ok=True)
-    os.makedirs(name=os.path.join(save_path_walk_forward, "01_explore_data"), exist_ok=True)
-    os.makedirs(name=os.path.join(save_path_walk_forward, "02_fit_model"), exist_ok=True)
-    os.makedirs(name=os.path.join(save_path_walk_forward, "03_evaluate_model"), exist_ok=True)
+    save_path = os.path.join(settings.save_path, "train_walk_forward")
+    os.makedirs(name=save_path, exist_ok=True)
+    os.makedirs(name=os.path.join(save_path, "01_explore_data"), exist_ok=True)
+    os.makedirs(name=os.path.join(save_path, "02_fit_model"), exist_ok=True)
+    os.makedirs(name=os.path.join(save_path, "03_evaluate_model"), exist_ok=True)
 
     # train xgboost with walk forward
     (
@@ -46,8 +45,8 @@ def main_train_walk_forward(data: pd.DataFrame, settings: BaseSettings, hyperpar
         hyperparameter=hyperparameter,
         shuffle=settings.shuffle,
         verbose=settings.verbose,
-        save_path=save_path_walk_forward,
+        save_path=save_path,
     )
 
     # create backtesting plots
-    evaluate_trading_plots(data=data_test_all, save_path=save_path_walk_forward)
+    evaluate_trading_plots(data=data_test_all, save_path=save_path)
