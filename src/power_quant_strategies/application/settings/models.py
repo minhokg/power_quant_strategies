@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from pydantic import BaseModel
 
 
@@ -18,4 +20,6 @@ class BaseSettings(BaseModel):
     max_run_time_per_model_fit: int = 20
     show_progress_bar: bool = True
     shuffle: bool = True
+    save_path: str = str(Path.cwd())
+    feature_selection_strategy: str = "boruta_style_aggressive"
     device: str = "cpu"
