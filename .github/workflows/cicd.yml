@@ -28,3 +28,41 @@ jobs:
         run: ruff check .
       - name: Run ruff formatter checks
         run: ruff format --check .
+
+  test:
+    name: Run Tests with pytest
+    runs-on: ubuntu-latest
+    if: ${{github.repository == 'minhokg/power_quant_strategies' }}
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: astral-sh/setup-uv@cec208311dfd045dd5311c1add060b2062131d57
+        with:
+          python-version: '3.11'
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Restore virtualenv cache
+        id: cache-venv
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-py3.11-${{ hashFiles('uv.lock') }}
+      - name: Install dependencies
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: uv sync --frozen
+      - name: Run pytest
+        run: uv run --no-sync pytest --cov-report=term-missing:skip-covered --cov-report="xml:coverage.xml" --junitxmal=pytest.xml --cov=src/power_quant_strategies tests/unit --disable-warnings --durations=50
+      - name: Pytest coverage comment
+        if: github.event_name == 'pull_request'
+        uses: MishaKav/pytest-coverage-comment@a01708271d42c5703d489b13eb503ba47c01e82a
+        with:
+          pytest-xml-coverage-path: coverage.xml
+          junitxml-path: pytest.xml
+          report-only-changed-files: true
+
