@@ -57,7 +57,7 @@ jobs:
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: uv sync --frozen
       - name: Run pytest
-        run: uv run --no-sync pytest --cov-report=term-missing:skip-covered --cov-report="xml:coverage.xml" --junitxmal=pytest.xml --cov=src/power_quant_strategies tests/unit --disable-warnings --durations=50
+        run: uv run --no-sync pytest --cov-report=term-missing:skip-covered --cov-report="xml:coverage.xml" --junitxml=pytest.xml --cov=src/power_quant_strategies tests/unit --disable-warnings --durations=50
       - name: Pytest coverage comment
         if: github.event_name == 'pull_request'
         uses: MishaKav/pytest-coverage-comment@a01708271d42c5703d489b13eb503ba47c01e82a
