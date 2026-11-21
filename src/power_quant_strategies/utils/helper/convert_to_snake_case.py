@@ -1,7 +1,7 @@
 import re
 
 
-def convert_to_snake_case(input_string: str):
+def convert_to_snake_case(input_string: str) -> str:
     """
     Convert to snake case.
 

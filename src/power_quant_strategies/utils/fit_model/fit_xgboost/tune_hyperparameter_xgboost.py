@@ -26,7 +26,7 @@ def tune_hyperparameter_xgboost(
     random_state: int = 42,
     direction: str = "maximize",
     n_trials: int = 100,
-    max_run_time_per_model_fit: float = None,
+    max_run_time_per_model_fit: float | None = None,
     show_progress_bar: bool = True,
     save_path: Union[str, None] = os.getcwd(),
     device: str = "cpu",
@@ -44,8 +44,8 @@ def tune_hyperparameter_xgboost(
     :param random_state: Random seed for fit_xgboost.
     :param direction: Defines whether to maximize or minimize
     :param n_trials: Defines how many hyperparameter tuning rounds
-    :param max_run_time_per_model_fit: Defines how long one model fit could take to make sure backtesting still runs in\
-    sensible time
+    :param max_run_time_per_model_fit: Maximum seconds one trial may take to be chosen as best, so that the backtest
+    still runs in sensible time. None means no limit. If no trial is fast enough, the fastest trial is chosen.
     :param show_progress_bar: Defines whether to show progress bar
     :param save_path: Path to save the result
     :param device: Device to use for XGBoost training (e.g. "cpu", "cuda", "gpu")
@@ -92,7 +92,10 @@ def tune_hyperparameter_xgboost(
     trials = study.trials_dataframe()
 
     # extract the best parameters
-    trials_within_runtime_limits = trials[trials["duration"].dt.total_seconds() <= max_run_time_per_model_fit]
+    if max_run_time_per_model_fit is None:
+        trials_within_runtime_limits = trials
+    else:
+        trials_within_runtime_limits = trials[trials["duration"].dt.total_seconds() <= max_run_time_per_model_fit]
     if trials_within_runtime_limits.shape[0] == 0:
         best_params = pd.DataFrame.from_dict(study.trials[trials["duration"].dt.total_seconds().idxmin()].params, orient="index", columns=["Value"])
     else:
@@ -101,7 +104,7 @@ def tune_hyperparameter_xgboost(
     # save results to disk
     if save_path:
         # save the trials
-        trials.to_parquet(path=os.path.join(save_path, "trials.xlsx"), index=True)
+        trials.to_parquet(path=os.path.join(save_path, "trials.parquet"), index=True)
         trials.to_excel(excel_writer=os.path.join(save_path, "trials.xlsx"))
 
         # save study object instance
@@ -131,25 +134,43 @@ def _objective(
     random_state: int = 42,
     name_metric_to_optimize: str = "roc_auc_score",
     device: str = "cpu",
-):
+) -> float:
+    """
+    Fit XGBoost with the hyperparameters Optuna suggests for this trial and score it.
+
+    All train/valid/test metrics are stored on the trial as user attributes.
+
+    :param trial: Optuna trial that suggests the hyperparameters.
+    :param data_train: DataFrame of training data
+    :param data_valid: DataFrame of validation data
+    :param data_test: DataFrame of testing data
+    :param column_name_target: Name of target column
+    :param n_estimators: Number of estimators for fit_xgboost
+    :param early_stopping_rounds: Number of early stopping rounds for fit_xgboost
+    :param verbose: Defines how verbose fit_xgboost should be
+    :param random_state: Random seed for fit_xgboost
+    :param name_metric_to_optimize: Classification or trading metric on the test split that Optuna optimizes
+    :param device: Device to use for XGBoost training
+    :return: Value of ``name_metric_to_optimize`` on the test split
+    """
     # define the hyperparameter space for Optuna
     hyperparameter = {
         "eval_metric": "logloss",
-        "eta": trial.suggest_loguniform("eta", 0.01, 0.3),
-        "gamma": trial.suggest_loguniform("gamma", 1e-8, 10.0),
+        "eta": trial.suggest_float("eta", 0.01, 0.3, log=True),
+        "gamma": trial.suggest_float("gamma", 1e-8, 10.0, log=True),
         "max_depth": trial.suggest_int("max_depth", 3, 20),
-        "min_child_weight": trial.suggest_loguniform("min_child_weight", 1e-3, 10.0),
-        "max_delta_step": trial.suggest_uniform("max_delta_step", 0.0, 10.0),
-        "subsample": trial.suggest_uniform("subsample", 0.5, 1.0),
-        "colsample_bytree": trial.suggest_uniform("colsample_bytree", 0.5, 1.0),
-        "colsample_bylevel": trial.suggest_uniform("colsample_bylevel", 0.5, 1.0),
-        "lambda": trial.suggest_loguniform("lambda", 1e-3, 10.0),
-        "alpha": trial.suggest_loguniform("alpha", 1e-3, 10.0),
+        "min_child_weight": trial.suggest_float("min_child_weight", 1e-3, 10.0, log=True),
+        "max_delta_step": trial.suggest_float("max_delta_step", 0.0, 10.0),
+        "subsample": trial.suggest_float("subsample", 0.5, 1.0),
+        "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
+        "colsample_bylevel": trial.suggest_float("colsample_bylevel", 0.5, 1.0),
+        "lambda": trial.suggest_float("lambda", 1e-3, 10.0, log=True),
+        "alpha": trial.suggest_float("alpha", 1e-3, 10.0, log=True),
         "tree_method": "exact",
     }
 
     if hyperparameter["tree_method"] in ["hist", "approx"]:
-        hyperparameter["colsample_bynode"] = trial.suggest_uniform("colsample_bynode", 0.5, 1.0)
+        hyperparameter["colsample_bynode"] = trial.suggest_float("colsample_bynode", 0.5, 1.0)
 
     # fit single fit_xgboost
     model, data_train, data_valid, data_test = fit_xgboost(

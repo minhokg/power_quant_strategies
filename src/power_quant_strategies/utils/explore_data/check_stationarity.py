@@ -8,7 +8,7 @@ from statsmodels.tsa.stattools import adfuller, kpss
 
 def check_stationarity(
     data: pd.DataFrame,
-    adf_maxlag: int = None,
+    adf_maxlag: int | None = None,
     adf_regression: Literal["c", "ct", "ctt", "n"] = "c",
     adf_autolag: Literal["AIC", "BIC", "t-stat", None] = "AIC",
     adf_store: bool = False,
@@ -17,7 +17,7 @@ def check_stationarity(
     pp_lags: Union[int, None] = None,
     pp_trend: Literal["n", "c", "ct"] = "c",
     pp_test_type: Literal["tau", "rho"] = "tau",
-    save_path: str = os.getcwd(),
+    save_path: str | None = os.getcwd(),
 ) -> pd.DataFrame:
     """
     Check stationarity of data with Augmented Dickey-Fuller (ADF) and Kwiatkowski-Phillips-Schmidt-Shin (KPSS) test.
@@ -29,7 +29,7 @@ def check_stationarity(
 
     :param data: Containing the data to be checked for stationarity. Each column is assumed to be a time series. The
     rows are the time axis sorted by ascending time
-    :param adf_maxlag: Maximum lag which is included in test, default value of
+    :param adf_maxlag: Maximum lag which is included in test. None uses 12*(nobs/100)^{1/4}.
     :param adf_regression: Constant and trend order to include in regression. "c": constant only (default). "ct": constant
     and trend. "ctt": constant, and linear and quadratic trend. "n": no constant, no trend.
     :param adf_autolag: Method to use when automatically determining the lag length among the values 0, 1, ..., maxloag.
@@ -45,7 +45,7 @@ def check_stationarity(
     (Default). ”ct” - Include a constant and linear time trend.
     :param pp_test_type: The test to use when computing the test statistic. “tau” is based on the t-stat and “rho” uses
     a test based on nobs times the re-centered regression coefficient.
-    :param save_path: Directory to save the metrics
+    :param save_path: Directory to save the metrics (in its 01_explore_data folder), or None to skip saving
     :return: metrics from adf and kpss test
     """
     metrics = {}
@@ -123,6 +123,7 @@ def check_stationarity(
 
     # save to disk
     if save_path is not None:
+        os.makedirs(os.path.join(save_path, "01_explore_data"), exist_ok=True)
         metrics.to_parquet(path=os.path.join(save_path, "01_explore_data", "stationarity_metrics.parquet"), index=True)
         metrics.to_excel(excel_writer=os.path.join(save_path, "01_explore_data", "stationarity_metrics.xlsx"))
 

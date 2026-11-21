@@ -39,17 +39,17 @@ def _cap_mask_by_score(
     return classified_features.index.to_series().isin(selected_indices)
 
 
-def select_features(feature_importance: pd.DataFrame, feature_selection_strategy: str = "boruta_style_aggressive", max_features: int = 350, save_path: str = os.getcwd()) -> list:
+def select_features(feature_importance: pd.DataFrame, feature_selection_strategy: str = "boruta_style_aggressive", max_features: int | None = 350, save_path: str = os.getcwd()) -> list:
     """
     Select features.
 
     :param feature_importance: Result from calculate_feature_importance
-    :param feature_selection_strategy: Feature selection mode. Use "kneedle" to select features up to the kneww point of
-    the importance score curve (adaptive cutoff based on diminishing returns), "boruta_style_aggressive" to keep only
-    Confirmed features, or "boruta_style_defensive" to keep Confirmed and Tentative features.
-    :param max_features: Maximum number of features to keep
-    :param save_path: Directory to save the features to keep and features to drop
-    :return: Tuple of features_to_keep
+    :param feature_selection_strategy: Feature selection mode. "boruta_style_aggressive" keeps only Confirmed
+    features, "boruta_style_defensive" keeps Confirmed and Tentative features.
+    :param max_features: Maximum number of features to keep (the highest scores win), or None for no limit
+    :param save_path: Directory to save the features to keep
+    :raises ValueError: If required columns are missing, no feature is classified or the strategy is unknown.
+    :return: Sorted list of the feature names to keep
     """
     # give user feedback
     logging.info("select features")
@@ -72,6 +72,8 @@ def select_features(feature_importance: pd.DataFrame, feature_selection_strategy
         mask_to_keep = classified_features["boruta_like_result"].isin({"Confirmed"})
     elif feature_selection_strategy == "boruta_style_defensive":
         mask_to_keep = classified_features["boruta_like_result"].isin({"Confirmed", "Tentative"})
+    else:
+        raise ValueError(f"Unknown feature_selection_strategy {feature_selection_strategy!r}. Use 'boruta_style_aggressive' or 'boruta_style_defensive'.")
 
     mask_to_keep = _cap_mask_by_score(
         classified_features=classified_features,

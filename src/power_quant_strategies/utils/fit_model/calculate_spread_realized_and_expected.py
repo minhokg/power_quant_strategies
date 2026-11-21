@@ -14,9 +14,10 @@ def _fit_spread_expected(
     target: pd.Series,
 ) -> tuple[RidgeCV | None, pd.Index]:
     """
-    Fit expected spread (for now hardcoded as linear function, maybe  .
+    Fit expected spread with a linear (ridge) regression.
 
-    we use a linear fit because we trust it is good enough, and it does not need hyperparameter tuning
+    We use a linear fit because we trust it is good enough, and it does not need hyperparameter tuning. Rows and
+    features with NaNs are dropped first (see remove_nans_iteratively_dataframe).
 
     :param data: input data date x features
     :param target: realized spread
@@ -65,13 +66,14 @@ def calculate_spread_realized(
     :param data: Original data with columns 'sample_weight' and column_name_target.
     :param column_name_target: Defines the target column name.
     :param required_cols: List of required columns, if None defaults to [column_name_target, 'sample_weight']
-    :return: data with new column spread
+    :raises KeyError: If a required column is missing.
+    :return: realized spread: +sample_weight where target is 1, -sample_weight where it is 0
     """
     # check inputs
     required_cols = [column_name_target, "sample_weight"] if required_cols is None else required_cols
     missing = [col for col in required_cols if col not in data.columns]
     if missing:
-        raise KeyError("columns are missing: %s", missing)
+        raise KeyError(f"columns are missing: {missing}")
     return (2 * data[column_name_target] - 1) * data["sample_weight"]
 
 

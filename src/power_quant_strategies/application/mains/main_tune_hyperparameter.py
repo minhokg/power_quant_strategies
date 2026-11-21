@@ -23,12 +23,13 @@ def main_tune_hyperparameter(data: pd.DataFrame, settings: BaseSettings) -> dict
     os.makedirs(name=save_path, exist_ok=True)
 
     ## prepare data
-    # ensure the index is datetimeindex
+    # ensure the index is datetimeindex (on a copy, so the caller's data is not changed)
+    data = data.copy()
     if not isinstance(data.index, pd.DatetimeIndex):
         data.index = pd.to_datetime(data.index)
 
     # shuffle the dataset before splitting to create random
-    data_train_valid_test = data.sample(frac=1, random_state=42)
+    data_train_valid_test = data.sample(frac=1, random_state=settings.random_state)
 
     # compute split indices
     end_train = int(len(data_train_valid_test) * settings.percentage_train_hyperparameter_tuning)

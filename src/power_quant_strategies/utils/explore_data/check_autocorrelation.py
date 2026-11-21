@@ -19,7 +19,7 @@ def check_autocorrelation(
     lb_lags: Optional[Union[int, Sequence[int]]] = None,
     lb_boxpierce: bool = False,
     lb_model_df: int = 0,
-    lb_period: int = None,
+    lb_period: int | None = None,
     lb_return_df: bool = True,
     lb_auto_lag: bool = True,
 ) -> pd.DataFrame:
@@ -32,12 +32,12 @@ def check_autocorrelation(
     :param lb_lags: if lags is an integer then this is taken to be the largest lag that is included, the test result is
     reported for all smaller lag length. If lags is a list or array, then all lags are included up to the largest lag in
     the list
-    :param lb_boxpierce:
-    :param lb_model_df:
-    :param lb_period:
-    :param lb_return_df:
-    :param lb_auto_lag:
-    :return:
+    :param lb_boxpierce: If True, also compute the Box-Pierce test.
+    :param lb_model_df: Degrees of freedom used by the model (subtracted from the lags), e.g. p + q of an ARMA model.
+    :param lb_period: Seasonal period of the series, used to choose the lags when lb_lags is None.
+    :param lb_return_df: Return the Ljung-Box result as a DataFrame (needed for the metrics below).
+    :param lb_auto_lag: Choose the lags automatically from the largest significant autocorrelation.
+    :return: Ljung-Box and runs test statistics and p-values, one row per column of data.
     """
     # Create path to save results in
     if save_path:
@@ -128,6 +128,7 @@ def _runs_test(data: Sequence[float]) -> dict:
     The Runs Test assesses whether the number of runs (consecutive sequences of values above or below the median)
     in the input data deviates significantly from randomness.
     Non-randomness can suggest autocorrelation or trends in the data.
+
     :param data: A sequence of numerical values (e.g., list, numpy array).
     :return: A dict containing: The Z-statistics for the test. The p-value, used to assess the null hypothesis of randomness.
     """

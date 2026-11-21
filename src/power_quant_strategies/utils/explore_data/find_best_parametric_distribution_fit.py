@@ -9,8 +9,15 @@ from scipy.stats import expon, kstest, laplace, lognorm, norm, probplot
 from power_quant_strategies.utils.helper.shorten_path import shorten_path
 
 
-def _calculate_aic_bic(log_likelihood, num_params, num_data):
-    """Calculate AIC, BIC."""
+def _calculate_aic_bic(log_likelihood: float, num_params: int, num_data: int) -> tuple[float, float]:
+    """
+    Calculate the Akaike and Bayesian information criteria.
+
+    :param log_likelihood: Log-likelihood of the fitted distribution.
+    :param num_params: Number of fitted parameters.
+    :param num_data: Number of data points the distribution was fitted on.
+    :return: AIC and BIC
+    """
     aic = 2 * num_params - 2 * log_likelihood
     bic = np.log(num_data) * num_params - 2 * log_likelihood
     return aic, bic
@@ -20,8 +27,12 @@ def find_best_parametric_distribution_fit(data: pd.DataFrame, save_path: str = o
     """
     Fits the given data to parametric distributions and evaluates each fit.
 
-    :param data: The data to be evaluated.
-    :param save_path: Directory to save the results and plots
+    Normal, exponential and Laplace are always tried; log-normal only if all values are positive. Non-finite values
+    are ignored. Results are sorted by AIC (best first).
+
+    :param data: DataFrame with exactly one column to be evaluated.
+    :param save_path: Directory to save the results and plots (in its 01_explore_data folder)
+    :raises ValueError: If data does not have exactly one column.
     :return: tuple with distribution evaluation metrics and a list of qq plots
     """
     if data.shape[1] != 1:
@@ -35,6 +46,8 @@ def find_best_parametric_distribution_fit(data: pd.DataFrame, save_path: str = o
     # check and remove non-finite values
     if not np.all(np.isfinite(x)):
         x = x[np.isfinite(x)]
+
+    os.makedirs(os.path.join(save_path, "01_explore_data"), exist_ok=True)
 
     if np.all(x > 0):
         distributions.append(lognorm)
@@ -54,7 +67,7 @@ def find_best_parametric_distribution_fit(data: pd.DataFrame, save_path: str = o
             num_params = len(params)
 
             # AIC and BIC
-            aic, bic = _calculate_aic_bic(log_likelihood=log_likelihood, num_params=num_params, num_data=len(data))
+            aic, bic = _calculate_aic_bic(log_likelihood=log_likelihood, num_params=num_params, num_data=len(x))
 
             # kolmogorov-smirnov test
             ks_test, ks_p = kstest(rvs=x, cdf=dist.name, args=params)
