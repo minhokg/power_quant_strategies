@@ -186,21 +186,24 @@ def _objective(
         device=device,
     )
 
-    # find optimal threshold and maximum pnl
+    # find optimal threshold and maximum pnl (not saved: this runs once per trial)
     threshold_train, maximum_pnl_train = find_optimal_threshold_and_maximum_pnl(
         data=data_train,
         column_name_target=column_name_target,
         split="train",
+        save_path=None,
     )
     threshold_valid, maximum_pnl_valid = find_optimal_threshold_and_maximum_pnl(
         data=data_valid,
         column_name_target=column_name_target,
         split="valid",
+        save_path=None,
     )
     threshold_test, maximum_pnl_test = find_optimal_threshold_and_maximum_pnl(
         data=data_test,
         column_name_target=column_name_target,
         split="test",
+        save_path=None,
     )
 
     # evaluate classification metrics
