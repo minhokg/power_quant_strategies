@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Environments and tools
+.venv/
+.env
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+pytest.xml
+.ipynb_checkpoints/
+
+# Pipeline output and logs
+app.log

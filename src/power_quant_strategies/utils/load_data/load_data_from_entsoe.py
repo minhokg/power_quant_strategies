@@ -5,7 +5,7 @@ from typing import Any, Callable
 import pandas as pd
 from entsoe.exceptions import NoMatchingDataError
 
-from power_quant_strategies.utils.load_data.EntsoeClient import EntsoeClient
+from power_quant_strategies.utils.load_data.entsoe_client import EntsoeClient
 
 
 def _fetch_chunk(fetch_fn: Callable[..., Any], chunk_start: pd.Timestamp, chunk_end: pd.Timestamp, kwargs: dict[str, Any]) -> tuple[int, pd.DataFrame | pd.Series | None]:
