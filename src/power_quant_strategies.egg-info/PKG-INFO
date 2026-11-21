@@ -1,0 +1,46 @@
+Metadata-Version: 2.4
+Name: power-quant-strategies
+Version: 0.1.0
+Summary: Quantitative trading strategies for electricity markets using machine learning, optimization, and statistical modeling.
+Author: Minho Kang
+License: MIT
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: arch>=8.0.0
+Requires-Dist: colorlog>=6.10.1
+Requires-Dist: entsoe-py>=0.8.0
+Requires-Dist: iniconfig>=2.3.0
+Requires-Dist: ipykernel>=7.3.0
+Requires-Dist: joblib>=1.5.3
+Requires-Dist: matplotlib>=3.11.0
+Requires-Dist: numpy<3.0,>=1.26
+Requires-Dist: openpyxl>=3.1.5
+Requires-Dist: optuna>=4.9.0
+Requires-Dist: pandas>=2.1.0
+Requires-Dist: pluggy>=1.6.0
+Requires-Dist: psutil>=7.2.2
+Requires-Dist: pyarrow>=24.0.0
+Requires-Dist: pydantic>=2.13.4
+Requires-Dist: pytest>=9.1.1
+Requires-Dist: scikit-learn>=1.9.0
+Requires-Dist: scipy>=1.17.1
+Requires-Dist: seaborn>=0.13.2
+Requires-Dist: statsmodels>=0.14.6
+Requires-Dist: torch<3.0,>=2.2
+Requires-Dist: xgboost>=3.2.0
+Dynamic: license-file
+
+# power_quant_strategies
+Quantitative trading strategies for electricity markets using machine learning, optimization, and statistical modeling.
+
+## Project Overview
+- Machine Learning / Deep Learning Pipeline from feature selection to Backtesting
+- Model Performance Comparison
+
+## Setup
+- install [uv](https://docs.astral.sh/uv/getting-started/installation/)
+- run `uv sync` to create the virtual environment and install all dependencies
+- run `uv run pre-commit install` to set up git hooks
+- if you want to build the package locally (there should be no use case for this), run `uv run python -m build`
+- if you want to build the documentation locally (there should be no use case for this), run `cd docs` and then `.\make.bat html`
