@@ -17,6 +17,6 @@ def get_usable_cpu_count(
     logging.info("get usable physical cpu count")
     cpu_count = psutil.cpu_count(logical=False)
     if cpu_count is None:
-        logging.warning("Could not determine physical cpu count, fallback to logical cpu count")
+        logging.warning("Could not determine physical cpu count, falling back to 1")
         return 1
     return max(1, round(cpu_count * percentage))

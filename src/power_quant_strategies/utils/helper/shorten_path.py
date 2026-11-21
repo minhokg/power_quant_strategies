@@ -8,8 +8,10 @@ def shorten_path(path: str, max_n_characters: int = 260) -> str:
     Shorten path.
 
     On windows the path can by default only be 260 characters long. Thus, try to shorten the filename. If directory path
-    is already too long, this will raise a ValueError.
-    :param path: full path to the file your try to store
+    is already too long, this will raise a ValueError. Shortened names keep their start and end in an 8 character hash
+    of the full name, so different long names stay different.
+
+    :param path: full path to the file you try to store
     :param max_n_characters: max number of characters allowed
     :return: potentially shortened full path
     """

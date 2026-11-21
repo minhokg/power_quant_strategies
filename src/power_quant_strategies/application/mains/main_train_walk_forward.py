@@ -14,7 +14,6 @@ def main_train_walk_forward(data: pd.DataFrame, settings: BaseSettings, hyperpar
     :param data: DataFrame used for training walk forward methodology
     :param settings: BaseSettings object
     :param hyperparameter: Hyperparameter used for training
-    :param save_path: Save path for saving results
     :return: None
     """
     # create necessary folders
@@ -44,7 +43,11 @@ def main_train_walk_forward(data: pd.DataFrame, settings: BaseSettings, hyperpar
         column_name_target=settings.column_name_target,
         hyperparameter=hyperparameter,
         shuffle=settings.shuffle,
+        n_estimators=settings.n_estimators,
+        early_stopping_rounds=settings.early_stopping_rounds,
         verbose=settings.verbose,
+        random_state=settings.random_state,
+        device=settings.device,
         save_path=save_path,
     )
 

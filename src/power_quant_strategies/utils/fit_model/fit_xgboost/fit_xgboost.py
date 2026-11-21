@@ -14,7 +14,7 @@ def fit_xgboost(
     n_estimators: int = 500,
     early_stopping_rounds: int = 10,
     verbose: Union[bool, int, None] = True,
-    hyperparameter: dict = None,
+    hyperparameter: dict | None = None,
     random_state: int = 42,
     device: str = "cpu",
 ) -> tuple:
@@ -28,16 +28,20 @@ def fit_xgboost(
     :param n_estimators: number of estimators
     :param early_stopping_rounds: early stopping rounds
     :param verbose: verbosity level
-    :param hyperparameter: hyperparameter
+    :param hyperparameter: XGBClassifier parameters (not changed by this function); None uses XGBoost's defaults
     :param random_state: random seed
     :param device: Device to use for training
-    :return: tuple with model and original datasets
+    :return: tuple with model and the three datasets, each with a new column "preds" (probability of target = 1)
     """
     # give user feedback
     logging.info("fit xgboost")
 
+    # copy so the caller's dict (shared across walk-forward periods) is never changed
+    hyperparameter = dict(hyperparameter or {})
+
     # For some reason this sometimes gets converted to a float (still .000) during backtesting and then throws an error inside XGBoost
-    hyperparameter["max_depth"] = int(hyperparameter["max_depth"])
+    if "max_depth" in hyperparameter:
+        hyperparameter["max_depth"] = int(hyperparameter["max_depth"])
 
     # determine feature names
     features = data_train.drop(columns=[col for col in [column_name_target, "preds"] if col in data_train.columns]).columns.tolist()

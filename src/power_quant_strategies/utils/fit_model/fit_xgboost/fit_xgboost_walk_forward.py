@@ -29,7 +29,29 @@ def _process_walk_forward_period(
     verbose: Union[bool, int, None] = False,
     random_state: int = 42,
     device: str = "cpu",
-):
+) -> tuple:
+    """
+    Train and evaluate one walk-forward period.
+
+    Trains on ``n_days_sliding_window`` days starting at day ``i_days_walk_forward`` (split into train and valid) and
+    tests on the single day that follows.
+
+    :param i_days_walk_forward: Index of the first day of the sliding window.
+    :param n_days_walk_forward: Total number of walk-forward periods (for logging).
+    :param data: Original data with features, target and sample_weight, sorted by time.
+    :param column_name_target: Name of target column.
+    :param hyperparameter: Hyperparameters for XGBoost.
+    :param shuffle: Defines whether to shuffle train and valid before splitting in train and valid.
+    :param percentage_train: Share of the sliding window used for training; the rest is validation.
+    :param n_days_sliding_window: Number of days used for training and validation.
+    :param n_estimators: Number of trees.
+    :param early_stopping_rounds: Number of rounds without improvement before training stops.
+    :param verbose: Defines whether to display the progress of early stopping.
+    :param random_state: Random seed for shuffle and XGBoost.
+    :param device: Device to use for XGBoost training.
+    :return: Test data with spreads and thresholds, then threshold and maximum pnl for train, valid and test, then
+        classification and trading metrics for train, valid and test.
+    """
     # get unique days (normalized datetime) from the index
     days = data.index.normalize().unique()
 
@@ -153,23 +175,28 @@ def fit_xgboost_walk_forward(
     save_path: str | None = str(Path.cwd()),
 ) -> tuple:
     """
-    Train lstm with walk forward cross validation.
+    Train XGBoost with walk forward cross validation.
 
-    :param data: Original data with features, target.
+    Every day after the first ``n_days_sliding_window`` days is predicted by a model trained on the days before it.
+
+    :param data: Original data with features, target and sample_weight.
     :param column_name_target: Name of target column.
-    :param hyperparameter: Hyperparameters for lstm.
+    :param hyperparameter: Hyperparameters for XGBoost.
     :param shuffle: Defines whether to shuffle train and valid before splitting in train and valid.
     :param percentage_train: Defines how much percent of the data will be used for train.
     :param n_estimators: Defines how many trees in the forest.
     :param early_stopping_rounds: Defines how many rounds of early stopping.
     :param verbose: Defines whether to display the progress of early stopping.
     :param n_days_sliding_window: Number of days used for training
-    :param random_state: Random seed for shuffle and lstm.
+    :param random_state: Random seed for shuffle and XGBoost.
     :param device: Device to use for XGBoost training
-    :return:
+    :param save_path: Directory to save plots and metrics of the whole test period, or None to skip saving.
+    :return: Test data of all periods, thresholds and maximum pnl per period, per-period classification and trading
+        metrics (train, valid, test), then threshold and maximum pnl of the last year and the classification and
+        trading metrics of the whole test period.
     """
     # give user feedback
-    logging.info("fit lstm walk forward")
+    logging.info("fit xgboost walk forward")
 
     # make sure there is enough data that matches the user settings
     assert len(data.index.normalize().unique()) > n_days_sliding_window
