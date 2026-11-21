@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import pytest
 
 from power_quant_strategies.utils.helper.remove_nans import remove_nans_iteratively_dataframe, remove_nans_iteratively_nparray
 
@@ -33,6 +34,20 @@ def test_remove_nans_iteratively_dataframe():
     df_2_cleaned = remove_nans_iteratively_dataframe(df_2)
     df_3_cleaned = remove_nans_iteratively_dataframe(df_3)
 
-    assert np.isclose(df_1_result, df_1_cleaned).all().all()
-    assert np.isclose(df_2_result, df_2_cleaned).all().all()
-    assert df_3_cleaned.empty
+    # _row_id keeps the original row position of every kept row (used to align targets)
+    assert df_1_cleaned["_row_id"].tolist() == [0, 1, 2]
+    assert df_2_cleaned["_row_id"].tolist() == [0, 1, 2]
+
+    assert np.isclose(df_1_result, df_1_cleaned.drop(columns="_row_id")).all().all()
+    assert np.isclose(df_2_result, df_2_cleaned.drop(columns="_row_id")).all().all()
+    assert df_3_cleaned.drop(columns="_row_id").columns.empty
+
+
+def test_remove_nans_iteratively_dataframe_rejects_non_positive_factor():
+    with pytest.raises(ValueError):
+        remove_nans_iteratively_dataframe(df_1, date_over_feature_preference_factor=0.0)
+
+
+def test_remove_nans_iteratively_nparray_rejects_non_positive_factor():
+    with pytest.raises(ValueError):
+        remove_nans_iteratively_nparray(np.array([[1.0]]), date_over_feature_preference_factor=0.0)

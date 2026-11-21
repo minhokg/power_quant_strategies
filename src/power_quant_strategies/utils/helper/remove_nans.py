@@ -13,28 +13,27 @@ def remove_nans_iteratively_nparray(
 
     :param matrix: 2D numpy array with NaNs
     :param date_over_feature_preference_factor: float, factor to prefer dropping dates over features
-    :return: numpy array with NaNs removed
+    :return: numpy array with NaNs removed; an empty (0, 0) array if every value was NaN
     """
+    if date_over_feature_preference_factor <= 0.0:
+        raise ValueError("date_over_feature_preference_factor must be greater than 0.0")
     mask = np.full(matrix.shape, fill_value=False, dtype=bool)
 
-    # iteratively drop worst feature or date until no NaNs remain
+    # iteratively drop worst feature or date until no NaNs remain among the kept cells
     masked_matrix = np.ma.array(matrix, mask=mask)
-    while np.isnan(masked_matrix).any() or not masked_matrix.mask.all():
+    while (np.isnan(masked_matrix.data) & ~masked_matrix.mask).any():
         nan_unmasked = np.isnan(masked_matrix.data) & ~masked_matrix.mask
         n_nans_in_features = np.sum(nan_unmasked, axis=0)
         n_nans_in_dates = np.sum(nan_unmasked, axis=1)
 
-        denom_cols = (~masked_matrix.mask).shape[0] - masked_matrix.mask.sum(axis=0)
-        denom_rows = (~masked_matrix.mask).shape[1] - masked_matrix.mask.sum(axis=1)
+        # divide by the number of cells still kept in each column / row
+        denom_cols = masked_matrix.shape[0] - masked_matrix.mask.sum(axis=0)
+        denom_rows = masked_matrix.shape[1] - masked_matrix.mask.sum(axis=1)
         denom_cols = np.where(denom_cols == 0, 1, denom_cols)
         denom_rows = np.where(denom_rows == 0, 1, denom_rows)
 
         fraction_nans_in_features = n_nans_in_features / denom_cols
         fraction_nans_in_dates = n_nans_in_dates / denom_rows
-
-        if fraction_nans_in_features.size == 0 or fraction_nans_in_dates.size == 0:
-            # All rows/cols are masked, this can only happen if all dates are fully masked (we should've exited the loop already) or the dataframe is empty
-            raise RuntimeError("All rows/cols masked; cannot determine worst index.")
 
         # identify worst feature and date
         worst_feature_idx = np.argmax(fraction_nans_in_features)
@@ -47,8 +46,6 @@ def remove_nans_iteratively_nparray(
             # drop date otherwise
             masked_matrix.mask[worst_date_idx, :] = True
 
-    if masked_matrix.mask.all():
-        raise RuntimeError("All rows/cols masked; cannot determine worst index.")
     # cut away masked rows and columns
     keep_rows = ~(masked_matrix.mask.all(axis=1))
     keep_cols = ~(masked_matrix.mask.all(axis=0))
@@ -65,7 +62,7 @@ def remove_nans_iteratively_dataframe(
 
     :param df: DataFrame with NaNs
     :param date_over_feature_preference_factor: float, factor to prefer dropping dates over features
-    :return: DataFrame with NaNs removed
+    :return: DataFrame with NaNs removed, plus a ``_row_id`` column holding each kept row's original position
     """
     if date_over_feature_preference_factor <= 0.0:
         raise ValueError("date_over_feature_preference_factor must be greater than 0.0")
